@@ -55,6 +55,7 @@ require (
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/validator/v10 v10.30.2
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
+	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/klauspost/compress v1.18.6 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.21 // indirect
