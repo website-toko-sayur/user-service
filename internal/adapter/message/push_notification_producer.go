@@ -2,19 +2,20 @@ package message
 
 import (
 	"user-service/internal/core/domain/model"
+	"user-service/utils"
 
 	"github.com/IBM/sarama"
 )
 
-type UserNotificationProducer struct {
+type PushNotificationProducer struct {
 	Producer[*model.UserNotificationEvent]
 }
 
-func NewUserNotificationProducer(producer sarama.SyncProducer, topic string) *UserNotificationProducer {
-	return &UserNotificationProducer{
+func NewPushNotificationProducer(producer sarama.SyncProducer) *PushNotificationProducer {
+	return &PushNotificationProducer{
 		Producer: Producer[*model.UserNotificationEvent]{
 			Producer: producer,
-			Topic:    topic,
+			Topic:    utils.PushNotification,
 		},
 	}
 }
