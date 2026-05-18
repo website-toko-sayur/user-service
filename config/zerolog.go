@@ -9,7 +9,6 @@ import (
 )
 
 func NewLogger() {
-	// pretty console logging
 	output := zerolog.ConsoleWriter{
 		Out:        os.Stdout,
 		TimeFormat: time.RFC3339,
@@ -21,6 +20,5 @@ func NewLogger() {
 		Timestamp().
 		Logger()
 
-	// global config
 	zerolog.TimeFieldFormat = time.RFC3339
 }

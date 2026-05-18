@@ -44,13 +44,13 @@ func (u *userRepository) GetUserByEmail(ctx context.Context, email string) (*ent
 	if result.Error != nil {
 		log.Error().
 			Err(result.Error).
-			Str("source", "internal.adapter.repository.GetUserByEmail")
+			Str("source", "internal.adapter.userRepository.GetUserByEmail")
 		return nil, result.Error
 	}
 
 	if result.RowsAffected == 0 {
 		log.Info().
-			Str("source", "internal.adapter.repository.GetUserByEmail").
+			Str("source", "internal.adapter.userRepository.GetUserByEmail").
 			Msg("User not found")
 		return nil, errors.New("404")
 	}
@@ -96,7 +96,7 @@ func (u *userRepository) CreateUserAccount(ctx context.Context, req entity.UserE
 
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.CreateUserAccount").
+			Str("source", "internal.adapter.userRepository.CreateUserAccount").
 			Msg("failed get customer role")
 
 		return 0, err
@@ -116,7 +116,7 @@ func (u *userRepository) CreateUserAccount(ctx context.Context, req entity.UserE
 
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.CreateUserAccount").
+			Str("source", "internal.adapter.userRepository.CreateUserAccount").
 			Msg("failed create user")
 
 		return 0, err
@@ -134,7 +134,7 @@ func (u *userRepository) CreateUserAccount(ctx context.Context, req entity.UserE
 
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.CreateUserAccount").
+			Str("source", "internal.adapter.userRepository.CreateUserAccount").
 			Msg("failed create verification token")
 
 		return 0, err
@@ -143,7 +143,7 @@ func (u *userRepository) CreateUserAccount(ctx context.Context, req entity.UserE
 	if err := tx.Commit().Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.CreateUserAccount").
+			Str("source", "internal.adapter.userRepository.CreateUserAccount").
 			Msg("failed commit transaction")
 
 		return 0, err
@@ -160,12 +160,12 @@ func (u *userRepository) UpdateUserVerified(ctx context.Context, userID int64) (
 			err = errors.New("404")
 			log.Error().
 				Err(err).
-				Str("source", "internal.adapter.repository.UpdateUserVerified")
+				Str("source", "internal.adapter.userRepository.UpdateUserVerified")
 			return nil, err
 		}
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.UpdateUserVerified")
+			Str("source", "internal.adapter.userRepository.UpdateUserVerified")
 		return nil, err
 	}
 
@@ -173,7 +173,7 @@ func (u *userRepository) UpdateUserVerified(ctx context.Context, userID int64) (
 	if err := u.db.WithContext(ctx).Save(&modelUser).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.UpdateUserVerified")
+			Str("source", "internal.adapter.userRepository.UpdateUserVerified")
 		return nil, err
 	}
 
@@ -199,12 +199,12 @@ func (u *userRepository) UpdatePasswordByID(ctx context.Context, req entity.User
 			err = errors.New("404")
 			log.Error().
 				Err(err).
-				Str("source", "internal.adapter.repository.UpdatePasswordByID")
+				Str("source", "internal.adapter.userRepository.UpdatePasswordByID")
 			return err
 		}
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.UpdatePasswordByID")
+			Str("source", "internal.adapter.userRepository.UpdatePasswordByID")
 		return err
 	}
 
@@ -212,7 +212,7 @@ func (u *userRepository) UpdatePasswordByID(ctx context.Context, req entity.User
 	if err := u.db.WithContext(ctx).Save(&modelUser).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.UpdatePasswordByID")
+			Str("source", "internal.adapter.userRepository.UpdatePasswordByID")
 		return err
 	}
 
@@ -226,13 +226,13 @@ func (u *userRepository) GetUserByID(ctx context.Context, userID int64) (*entity
 	if result.Error != nil {
 		log.Error().
 			Err(result.Error).
-			Str("source", "internal.adapter.repository.GetUserByID")
+			Str("source", "internal.adapter.userRepository.GetUserByID")
 		return nil, result.Error
 	}
 
 	if result.RowsAffected == 0 {
 		log.Info().
-			Str("source", "internal.adapter.repository.GetUserByID").
+			Str("source", "internal.adapter.userRepository.GetUserByID").
 			Msg("User not found")
 		return nil, errors.New("404")
 	}
@@ -259,17 +259,17 @@ func (u *userRepository) UpdateDataUser(ctx context.Context, req entity.UserEnti
 		Photo:   req.Photo,
 	}
 
-	result := u.db.Where("id = ? AND is_verified = true", req.ID).First(&modelUser)
+	result := u.db.WithContext(ctx).Where("id = ? AND is_verified = true", req.ID).First(&modelUser)
 	if result.Error != nil {
 		log.Error().
 			Err(result.Error).
-			Str("source", "internal.adapter.repository.UpdateDataUser")
+			Str("source", "internal.adapter.userRepository.UpdateDataUser")
 		return result.Error
 	}
 
 	if result.RowsAffected == 0 {
 		log.Info().
-			Str("source", "internal.adapter.repository.UpdateDataUser").
+			Str("source", "internal.adapter.userRepository.UpdateDataUser").
 			Msg("User not found")
 		return errors.New("404")
 	}
@@ -279,10 +279,10 @@ func (u *userRepository) UpdateDataUser(ctx context.Context, req entity.UserEnti
 	modelUser.Address = req.Address
 	modelUser.Phone = req.Phone
 
-	if err := u.db.UpdateColumns(&modelUser).Error; err != nil {
+	if err := u.db.WithContext(ctx).UpdateColumns(&modelUser).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.UpdateDataUser")
+			Str("source", "internal.adapter.userRepository.UpdateDataUser")
 		return err
 	}
 
@@ -296,13 +296,13 @@ func (u *userRepository) GetCustomerAll(ctx context.Context, query entity.QueryS
 	order := fmt.Sprintf("%s %s", query.OrderBy, query.OrderType)
 	offset := (query.Page - 1) * query.Limit
 
-	sqlMain := u.db.Preload("Roles", "name = ?", "Customer").
+	sqlMain := u.db.WithContext(ctx).Preload("Roles", "name = ?", "Customer").
 		Where("name ILIKE ? OR email ILIKE ? OR phone ILIKE ?", "%"+query.Search+"%", "%"+query.Search+"%", "%"+query.Search+"%")
 
 	if err := sqlMain.Model(&modelUsers).Count(&countData).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.GetCustomerAll")
+			Str("source", "internal.adapter.userRepository.GetCustomerAll")
 		return nil, 0, 0, err
 	}
 
@@ -311,14 +311,14 @@ func (u *userRepository) GetCustomerAll(ctx context.Context, query entity.QueryS
 	if err := sqlMain.Order(order).Limit(int(query.Limit)).Offset(int(offset)).Find(&modelUsers).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.GetCustomerAll")
+			Str("source", "internal.adapter.userRepository.GetCustomerAll")
 		return nil, 0, 0, err
 	}
 
 	if len(modelUsers) < 1 {
 		err := errors.New("404")
 		log.Info().
-			Str("source", "internal.adapter.repository.GetCustomerAll").
+			Str("source", "internal.adapter.userRepository.GetCustomerAll").
 			Msg("No customer found")
 		return nil, 0, 0, err
 	}
@@ -344,17 +344,17 @@ func (u *userRepository) GetCustomerAll(ctx context.Context, query entity.QueryS
 func (u *userRepository) GetCustomerByID(ctx context.Context, customerID int64) (*entity.UserEntity, error) {
 	modelUser := model.User{}
 
-	if err := u.db.Where("id = ?", customerID).Preload("Roles").First(&modelUser).Error; err != nil {
+	if err := u.db.WithContext(ctx).Where("id = ?", customerID).Preload("Roles").First(&modelUser).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			err = errors.New("404")
 			log.Info().
-				Str("source", "internal.adapter.repository.GetCustomerByID").
+				Str("source", "internal.adapter.userRepository.GetCustomerByID").
 				Msg("User not found")
 			return nil, err
 		}
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.GetCustomerByID")
+			Str("source", "internal.adapter.userRepository.GetCustomerByID")
 
 		return nil, err
 	}
@@ -380,10 +380,10 @@ func (u *userRepository) GetCustomerByID(ctx context.Context, customerID int64) 
 func (u *userRepository) CreateCustomer(ctx context.Context, req entity.UserEntity) (int64, error) {
 	modelRole := model.Role{}
 
-	if err := u.db.Where("id =?", req.RoleID).First(&modelRole).Error; err != nil {
+	if err := u.db.WithContext(ctx).Where("id =?", req.RoleID).First(&modelRole).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.CreateCustomer")
+			Str("source", "internal.adapter.userRepository.CreateCustomer")
 		return 0, err
 	}
 
@@ -400,10 +400,10 @@ func (u *userRepository) CreateCustomer(ctx context.Context, req entity.UserEnti
 		IsVerified: true,
 	}
 
-	if err := u.db.Create(&modelUser).Error; err != nil {
+	if err := u.db.WithContext(ctx).Create(&modelUser).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.CreateCustomer")
+			Str("source", "internal.adapter.userRepository.CreateCustomer")
 		return 0, err
 	}
 
@@ -412,25 +412,25 @@ func (u *userRepository) CreateCustomer(ctx context.Context, req entity.UserEnti
 
 func (u *userRepository) UpdateCustomer(ctx context.Context, req entity.UserEntity) error {
 	modelRole := model.Role{}
-	if err := u.db.Where("id =?", req.RoleID).First(&modelRole).Error; err != nil {
+	if err := u.db.WithContext(ctx).Where("id =?", req.RoleID).First(&modelRole).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.UpdateCustomer")
+			Str("source", "internal.adapter.userRepository.UpdateCustomer")
 		return err
 	}
 
 	modelUser := model.User{}
-	if err := u.db.Where("id =?", req.ID).First(&modelUser).Error; err != nil {
+	if err := u.db.WithContext(ctx).Where("id =?", req.ID).First(&modelUser).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			err = errors.New("404")
 			log.Info().
-				Str("source", "internal.adapter.repository.UpdateCustomer").
+				Str("source", "internal.adapter.userRepository.UpdateCustomer").
 				Msg("No customer found")
 			return err
 		}
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.UpdateCustomer")
+			Str("source", "internal.adapter.userRepository.UpdateCustomer")
 		return err
 	}
 
@@ -457,10 +457,10 @@ func (u *userRepository) UpdateCustomer(ctx context.Context, req entity.UserEnti
 		modelUser.Password = req.Password
 	}
 
-	if err := u.db.Save(&modelUser).Error; err != nil {
+	if err := u.db.WithContext(ctx).Save(&modelUser).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.UpdateCustomer")
+			Str("source", "internal.adapter.userRepository.UpdateCustomer")
 		return err
 	}
 
@@ -469,24 +469,24 @@ func (u *userRepository) UpdateCustomer(ctx context.Context, req entity.UserEnti
 
 func (u *userRepository) DeleteCustomer(ctx context.Context, customerID int64) error {
 	modelUser := model.User{}
-	if err := u.db.Where("id =?", customerID).First(&modelUser).Error; err != nil {
+	if err := u.db.WithContext(ctx).Where("id =?", customerID).First(&modelUser).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			err = errors.New("404")
 			log.Info().
-				Str("source", "internal.adapter.repository.DeleteCustomer").
+				Str("source", "internal.adapter.userRepository.DeleteCustomer").
 				Msg("No customer found")
 			return err
 		}
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.DeleteCustomer")
+			Str("source", "internal.adapter.userRepository.DeleteCustomer")
 		return err
 	}
 
-	if err := u.db.Delete(&modelUser).Error; err != nil {
+	if err := u.db.WithContext(ctx).Delete(&modelUser).Error; err != nil {
 		log.Error().
 			Err(err).
-			Str("source", "internal.adapter.repository.DeleteCustomer")
+			Str("source", "internal.adapter.userRepository.DeleteCustomer")
 		return err
 	}
 	return nil
