@@ -11,6 +11,7 @@ import (
 	"user-service/internal/core/service"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 )
 
@@ -31,12 +32,13 @@ func NewRoleHandler(
 	roleService service.RoleServiceInterface,
 	cfg *config.Config,
 	jwtService service.JwtServiceInterface,
+	redis *redis.Client,
 ) RoleHandlerInterface {
 	role := &roleHandler{
 		roleService: roleService,
 	}
 
-	mid := adapter.NewMiddlewareAdapter(cfg, jwtService)
+	mid := adapter.NewMiddlewareAdapter(cfg, jwtService, redis)
 
 	adminGroup := app.Group("/admin", mid.CheckToken())
 

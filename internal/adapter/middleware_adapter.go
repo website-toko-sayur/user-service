@@ -9,29 +9,30 @@ import (
 	"user-service/internal/core/service"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 )
 
 type middlewareAdapter struct {
 	cfg        *config.Config
 	jwtService service.JwtServiceInterface
+	redis      *redis.Client
 }
 
 type MiddlewareAdapterInterface interface {
 	CheckToken() fiber.Handler
 }
 
-func NewMiddlewareAdapter(cfg *config.Config, jwtService service.JwtServiceInterface) MiddlewareAdapterInterface {
+func NewMiddlewareAdapter(cfg *config.Config, jwtService service.JwtServiceInterface, redis *redis.Client) MiddlewareAdapterInterface {
 	return &middlewareAdapter{
 		cfg:        cfg,
 		jwtService: jwtService,
+		redis:      redis,
 	}
 }
 
 func (m *middlewareAdapter) CheckToken() fiber.Handler {
 	return func(c fiber.Ctx) error {
-		redisConn := config.NewConfig().NewRedisClient()
-
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
 			return fiber.NewError(fiber.StatusUnauthorized, "missing or invalid token")
@@ -49,7 +50,7 @@ func (m *middlewareAdapter) CheckToken() fiber.Handler {
 			return fiber.NewError(fiber.StatusUnauthorized, "invalid token")
 		}
 
-		getSession, err := redisConn.Get(c.Context(), tokenString).Result()
+		getSession, err := m.redis.Get(c.Context(), tokenString).Result()
 		if err != nil || len(getSession) == 0 {
 			log.Error().
 				Err(err).

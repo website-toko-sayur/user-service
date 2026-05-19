@@ -30,9 +30,8 @@ var allowedImageExtensions = map[string]bool{
 }
 
 type MinioStorageStruct struct {
-	cfg        *config.Config
-	client     *minio.Client
-	bucketName string
+	cfg    *config.Config
+	client *minio.Client
 }
 
 type MinioStorageInterface interface {
@@ -40,11 +39,10 @@ type MinioStorageInterface interface {
 	ProcessAndUploadImage(ctx context.Context, fileHeader *multipart.FileHeader) (string, error)
 }
 
-func NewMinioStorage(cfg *config.Config, client *minio.Client, bucket string) MinioStorageInterface {
+func NewMinioStorage(cfg *config.Config, client *minio.Client) MinioStorageInterface {
 	return &MinioStorageStruct{
-		cfg:        cfg,
-		client:     client,
-		bucketName: bucket,
+		cfg:    cfg,
+		client: client,
 	}
 }
 
@@ -59,7 +57,7 @@ func (m *MinioStorageStruct) UploadFile(ctx context.Context, path string, fileBu
 
 	_, err := m.client.PutObject(
 		ctx,
-		m.bucketName,
+		m.cfg.Storage.Bucket,
 		path,
 		bytes.NewReader(fileBuffer.Bytes()),
 		int64(fileBuffer.Len()),
@@ -70,7 +68,7 @@ func (m *MinioStorageStruct) UploadFile(ctx context.Context, path string, fileBu
 	if err != nil {
 		log.Error().
 			Err(err).
-			Str("bucket", m.bucketName).
+			Str("bucket", m.cfg.Storage.Bucket).
 			Str("path", path).
 			Str("source", "internal.adapter.storage.UploadFile").
 			Msg("failed upload file to minio")
@@ -86,7 +84,7 @@ func (m *MinioStorageStruct) UploadFile(ctx context.Context, path string, fileBu
 	url := fmt.Sprintf(
 		"%s/%s/%s",
 		publicURL,
-		m.bucketName,
+		m.cfg.Storage.Bucket,
 		path,
 	)
 

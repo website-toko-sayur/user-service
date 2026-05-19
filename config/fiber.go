@@ -7,7 +7,6 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/rs/zerolog/log"
-	"github.com/spf13/viper"
 )
 
 type structValidator struct {
@@ -18,11 +17,11 @@ func (v *structValidator) Validate(out any) error {
 	return v.validate.Struct(out)
 }
 
-func NewFiber(config *viper.Viper) *fiber.App {
+func (cfg Config) NewFiber() *fiber.App {
 	validate := validator.New()
 
 	app := fiber.New(fiber.Config{
-		AppName: config.GetString("app.name"),
+		AppName: cfg.App.AppName,
 
 		CaseSensitive: true,
 		StrictRouting: false,

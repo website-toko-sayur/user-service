@@ -13,6 +13,7 @@ import (
 	"user-service/utils/conv"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 )
 
@@ -42,12 +43,13 @@ func NewUserHandler(
 	userService service.UserServiceInterface,
 	cfg *config.Config,
 	jwtService service.JwtServiceInterface,
+	redis *redis.Client,
 ) UserHandlerInterface {
 	userHandler := &userHandler{
 		userService: userService,
 	}
 
-	mid := adapter.NewMiddlewareAdapter(cfg, jwtService)
+	mid := adapter.NewMiddlewareAdapter(cfg, jwtService, redis)
 
 	// =========================
 	// Public Routes

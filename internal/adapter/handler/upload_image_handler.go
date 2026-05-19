@@ -8,6 +8,7 @@ import (
 	"user-service/internal/core/service"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 )
 
@@ -24,12 +25,13 @@ func NewUploadImage(
 	cfg *config.Config,
 	storageHandler storage.MinioStorageInterface,
 	jwtService service.JwtServiceInterface,
+	redis *redis.Client,
 ) UploadImageInterface {
 	res := &uploadImage{
 		storageHandler: storageHandler,
 	}
 
-	mid := adapter.NewMiddlewareAdapter(cfg, jwtService)
+	mid := adapter.NewMiddlewareAdapter(cfg, jwtService, redis)
 	authGroup := app.Group("/auth", mid.CheckToken())
 	authGroup.Post("/profile/image-upload", res.UploadImage)
 

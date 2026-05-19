@@ -10,7 +10,7 @@ import (
 
 var Ctx = context.Background()
 
-func (cfg Config) NewRedisClient() *redis.Client {
+func (cfg Config) NewRedisClient() (*redis.Client, error) {
 	connect := fmt.Sprintf("%s:%s", cfg.Redis.Host, cfg.Redis.Port)
 	client := redis.NewClient(&redis.Options{
 		Addr:     connect,
@@ -23,7 +23,8 @@ func (cfg Config) NewRedisClient() *redis.Client {
 			Err(err).
 			Str("source", "config.NewRedisClient").
 			Msg("Failed to ping redis client")
+		return nil, err
 	}
 
-	return client
+	return client, nil
 }
