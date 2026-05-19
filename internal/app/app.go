@@ -12,7 +12,6 @@ import (
 	"user-service/internal/adapter/message"
 	"user-service/internal/adapter/repository"
 	"user-service/internal/adapter/storage"
-	middlewareGateway "user-service/internal/middleware"
 
 	"user-service/internal/core/service"
 
@@ -93,7 +92,7 @@ func RunServer() {
 	app := cfg.NewFiber()
 	app.Use(fiberRecover.New())
 	app.Use(fiberCors.New())
-	app.Use(middlewareGateway.GatewayValidationMiddleware())
+	// app.Use(middlewareGateway.GatewayValidationMiddleware())
 
 	app.Get("/api/check", func(c fiber.Ctx) error {
 		return c.SendString("OK")
