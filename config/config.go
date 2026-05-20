@@ -17,6 +17,9 @@ type App struct {
 
 	UrlForgotPassword string `json:"url_forgot_password"`
 	UrlFrontFE        string `json:"url_front_fe"`
+
+	GatewaySecretKey  string `json:"gateway_secret_key"`
+	RequestApiGAteway string `json:"request_api_gateway"`
 }
 
 type PsqlDB struct {
@@ -72,6 +75,9 @@ func NewConfig() *Config {
 
 			UrlForgotPassword: viper.GetString("URL_FORGOT_PASSWORD"),
 			UrlFrontFE:        viper.GetString("URL_FRONT_FE"),
+
+			GatewaySecretKey:  viper.GetString("GATEWAY_SECRET_KEY"),
+			RequestApiGAteway: viper.GetString("REQUEST_API_GATEWAY"),
 		},
 		Psql: PsqlDB{
 			Host:      viper.GetString("DATABASE_HOST"),
