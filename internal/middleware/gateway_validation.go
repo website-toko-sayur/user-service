@@ -1,19 +1,19 @@
 package middleware
 
 import (
-	"os"
+	"user-service/config"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/rs/zerolog/log"
 )
 
-func GatewayValidationMiddleware() fiber.Handler {
-	requireGateway := os.Getenv("REQUEST_API_GATEWAY")
+func GatewayValidationMiddleware(cfg *config.Config) fiber.Handler {
+	requireGateway := cfg.App.RequestApiGAteway
 	if requireGateway == "" {
 		requireGateway = "true"
 	}
 
-	expectedGateway := os.Getenv("GATEWAY_SECRET_KEY")
+	expectedGateway := cfg.App.GatewaySecretKey
 
 	return func(c fiber.Ctx) error {
 		if requireGateway == "false" {
