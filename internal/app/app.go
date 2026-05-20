@@ -27,6 +27,8 @@ import (
 func RunServer() {
 	cfg := config.NewConfig()
 
+	config.NewLogger(cfg.App.AppEnv, cfg.App.LogLevel, cfg.App.AppName)
+
 	db, err := cfg.ConnectionPostgres()
 	if err != nil {
 		log.Fatal().

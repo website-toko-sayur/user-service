@@ -11,6 +11,7 @@ type App struct {
 	AppEnv     string `json:"app_env"`
 	AppName    string `json:"app_name"`
 	WebPrefork bool   `json:"web_prefork"`
+	LogLevel   string `json:"log_level"`
 
 	JwtSecretKey string `json:"jwt_secret_key"`
 	JwtIssuer    string `json:"jwt_issuer"`
@@ -66,9 +67,10 @@ func NewConfig() *Config {
 	return &Config{
 		App: App{
 			AppPort:    viper.GetString("APP_PORT"),
-			AppEnv:     viper.GetString("APP_PORT"),
+			AppEnv:     viper.GetString("APP_ENV"),
 			AppName:    viper.GetString("APP_NAME"),
 			WebPrefork: viper.GetBool("WEB_PREFORK"),
+			LogLevel:   viper.GetString("LOG_LEVEL"),
 
 			JwtSecretKey: viper.GetString("JWT_SECRET_KEY"),
 			JwtIssuer:    viper.GetString("JWT_ISSUER"),
