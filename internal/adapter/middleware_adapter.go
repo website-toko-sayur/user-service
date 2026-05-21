@@ -74,6 +74,7 @@ func (m *middlewareAdapter) CheckToken() fiber.Handler {
 		path := c.Path()
 		segments := strings.Split(strings.Trim(path, "/"), "/")
 
+		// membatasi akses user dengan role customer supaya tidak bisa mengakses endpoint yang diawali dengan /admin
 		if jwtUserData.RoleName == "Customer" &&
 			len(segments) > 0 &&
 			segments[0] == "admin" {
