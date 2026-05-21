@@ -1,8 +1,8 @@
 package message
 
 import (
+	"user-service/config"
 	"user-service/internal/core/domain/model"
-	"user-service/utils"
 
 	"github.com/IBM/sarama"
 )
@@ -11,11 +11,11 @@ type EmailVerificationProducer struct {
 	Producer[*model.UserNotificationEvent]
 }
 
-func NewEmailVerficationProducer(producer sarama.SyncProducer) *EmailVerificationProducer {
+func NewEmailVerficationProducer(producer sarama.SyncProducer, cfg *config.Config) *EmailVerificationProducer {
 	return &EmailVerificationProducer{
 		Producer: Producer[*model.UserNotificationEvent]{
 			Producer: producer,
-			Topic:    utils.NOTIF_EMAIL_VERIFICATION,
+			Topic:    cfg.Topic.NotifEmailVerification,
 		},
 	}
 }

@@ -40,6 +40,14 @@ type Kafka struct {
 	ProducerEnabled  bool     `json:"kafka_producer_enabled"`
 }
 
+type Topic struct {
+	NotifEmailVerification   string `json:"notif_email_verification"`
+	NotifEmailForgotPassword string `json:"notif_email_forgot_password"`
+	NotifEmailCreateCustomer string `json:"notif_email_create_customer"`
+	NotifEmailUpdateCustomer string `json:"notif_email_update_customer"`
+	PushNotif                string `json:"push_notif"`
+}
+
 type Minio struct {
 	Endpoint  string `json:"minio_endpoint"`
 	PublicURL string `json:"minio_public_url"`
@@ -59,6 +67,7 @@ type Config struct {
 	App     App    `json:"app"`
 	Psql    PsqlDB `json:"psql"`
 	Kafka   Kafka  `json:"kafka"`
+	Topic   Topic  `json:"topic"`
 	Storage Minio  `json:"storage"`
 	Redis   Redis  `json:"redis"`
 }
@@ -95,6 +104,13 @@ func NewConfig() *Config {
 			BootstrapServers: strings.Split(viper.GetString("KAFKA_BOOTSTRAP_SERVERS"), ","),
 			GroupID:          viper.GetString("KAFKA_GROUP_ID"),
 			ProducerEnabled:  viper.GetBool("KAFKA_PRODUCER_ENABLED"),
+		},
+		Topic: Topic{
+			NotifEmailVerification:   viper.GetString("TOPIC_NOTIF_EMAIL_VERIFICATION"),
+			NotifEmailForgotPassword: viper.GetString("TOPIC_NOTIF_EMAIL_FORGOT_PASSWORD"),
+			NotifEmailCreateCustomer: viper.GetString("TOPIC_NOTIF_EMAIL_CREATE_CUSTOMER"),
+			NotifEmailUpdateCustomer: viper.GetString("TOPIC_NOTIF_EMAIL_UPDATE_CUSTOMER"),
+			PushNotif:                viper.GetString("TOPIC_PUSH_NOTIF"),
 		},
 		Storage: Minio{
 			Endpoint:  viper.GetString("MINIO_ENDPOINT"),

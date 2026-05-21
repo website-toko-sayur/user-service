@@ -64,11 +64,11 @@ func RunServer() {
 	)
 
 	if producer != nil {
-		emailVerificationProducer = message.NewEmailVerficationProducer(producer)
+		emailVerificationProducer = message.NewEmailVerficationProducer(producer, cfg)
 		emailForgotPasswordProducer = message.NewEmailForgotPasswordProducer(producer)
-		emailCreateCustomerProducer = message.NewEmailCreateCustomerProducer(producer)
-		emailUpdateCustomerProducer = message.NewEmailUpdateCustomerProducer(producer)
-		pushNotificationProducer = message.NewPushNotificationProducer(producer)
+		emailCreateCustomerProducer = message.NewEmailCreateCustomerProducer(producer, cfg)
+		emailUpdateCustomerProducer = message.NewEmailUpdateCustomerProducer(producer, cfg)
+		pushNotificationProducer = message.NewPushNotificationProducer(producer, cfg)
 	}
 
 	storageHandler := storage.NewMinioStorage(cfg, minio)
