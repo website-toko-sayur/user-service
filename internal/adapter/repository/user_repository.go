@@ -334,7 +334,7 @@ func (u *userRepository) GetCustomerAll(ctx context.Context, query entity.QueryS
 			Name:     val.Name,
 			Email:    val.Email,
 			RoleName: roleName,
-			Phone:    val.Email,
+			Phone:    val.Phone,
 			Photo:    val.Photo,
 		})
 	}
