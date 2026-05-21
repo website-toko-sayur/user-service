@@ -129,29 +129,26 @@ func (r *roleRepository) GetByID(ctx context.Context, id int64) (*entity.RoleEnt
 }
 
 func (r *roleRepository) Update(ctx context.Context, req entity.RoleEntity) error {
-	modelRole := model.Role{
-		Name: req.Name,
+	result := r.db.WithContext(ctx).
+		Model(&model.Role{}).
+		Where("id = ?", req.ID).
+		Update("name", req.Name)
+
+	if result.Error != nil {
+		log.Error().
+			Err(result.Error).
+			Str("source", "internal.adapter.roleRepository.Update").
+			Msg("failed update role")
+
+		return result.Error
 	}
 
-	if err := r.db.Where("id = ?", req.ID).First(&modelRole).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			err = errors.New("404")
-			log.Info().
-				Str("source", "internal.adapter.roleRepository.Update").
-				Msg("Role not found")
-			return err
-		}
-		log.Error().
-			Err(err).
-			Str("source", "internal.adapter.roleRepository.Update")
-		return err
-	}
+	if result.RowsAffected == 0 {
+		log.Info().
+			Str("source", "internal.adapter.roleRepository.Update").
+			Msg("Role not found")
 
-	if err := r.db.Save(modelRole).Error; err != nil {
-		log.Error().
-			Err(err).
-			Str("source", "internal.adapter.roleRepository.Update")
-		return err
+		return errors.New("404")
 	}
 
 	return nil
