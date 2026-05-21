@@ -251,39 +251,30 @@ func (u *userRepository) GetUserByID(ctx context.Context, userID int64) (*entity
 }
 
 func (u *userRepository) UpdateDataUser(ctx context.Context, req entity.UserEntity) error {
-	modelUser := model.User{
-		Name:    req.Name,
-		Email:   req.Email,
-		Address: req.Address,
-		Phone:   req.Phone,
-		Photo:   req.Photo,
-	}
+	result := u.db.WithContext(ctx).
+		Model(&model.User{}).
+		Where("id = ? AND is_verified = ?", req.ID, true).
+		Updates(map[string]any{
+			"name":    req.Name,
+			"email":   req.Email,
+			"address": req.Address,
+			"phone":   req.Phone,
+			"photo":   req.Photo,
+			"lat":     req.Lat,
+			"lng":     req.Lng,
+		})
 
-	result := u.db.WithContext(ctx).Where("id = ? AND is_verified = true", req.ID).First(&modelUser)
 	if result.Error != nil {
 		log.Error().
 			Err(result.Error).
-			Str("source", "internal.adapter.userRepository.UpdateDataUser")
+			Str("source", "internal.adapter.userRepository.UpdateDataUser").
+			Msg("failed update user")
+
 		return result.Error
 	}
 
 	if result.RowsAffected == 0 {
-		log.Info().
-			Str("source", "internal.adapter.userRepository.UpdateDataUser").
-			Msg("User not found")
-		return errors.New("404")
-	}
-
-	modelUser.Lat = req.Lat
-	modelUser.Lng = req.Lng
-	modelUser.Address = req.Address
-	modelUser.Phone = req.Phone
-
-	if err := u.db.WithContext(ctx).UpdateColumns(&modelUser).Error; err != nil {
-		log.Error().
-			Err(err).
-			Str("source", "internal.adapter.userRepository.UpdateDataUser")
-		return err
+		return errors.New("user not found")
 	}
 
 	return nil
