@@ -304,7 +304,7 @@ func (u *userService) ForgotPassword(ctx context.Context, req entity.UserEntity)
 	reqEntity := entity.VerificationTokenEntity{
 		UserID:    user.ID,
 		Token:     token,
-		TokenType: utils.EmailForgotPassword,
+		TokenType: utils.NOTIF_EMAIL_FORGOT_PASSWORD,
 	}
 
 	err = u.repoToken.CreateVerificationToken(ctx, reqEntity)

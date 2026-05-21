@@ -15,7 +15,7 @@ func NewEmailCreateCustomerProducer(producer sarama.SyncProducer) *EmailCreateCu
 	return &EmailCreateCustomerProducer{
 		Producer: Producer[*model.UserNotificationEvent]{
 			Producer: producer,
-			Topic:    utils.EmailCreateCustomer,
+			Topic:    utils.NOTIF_EMAIL_CREATE_CUSTOMER,
 		},
 	}
 }

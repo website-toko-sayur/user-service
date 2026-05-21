@@ -15,7 +15,7 @@ func NewEmailVerficationProducer(producer sarama.SyncProducer) *EmailVerificatio
 	return &EmailVerificationProducer{
 		Producer: Producer[*model.UserNotificationEvent]{
 			Producer: producer,
-			Topic:    utils.EmailVerification,
+			Topic:    utils.NOTIF_EMAIL_VERIFICATION,
 		},
 	}
 }

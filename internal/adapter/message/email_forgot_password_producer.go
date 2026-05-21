@@ -15,7 +15,7 @@ func NewEmailForgotPasswordProducer(producer sarama.SyncProducer) *EmailForgotPa
 	return &EmailForgotPasswordProducer{
 		Producer: Producer[*model.UserNotificationEvent]{
 			Producer: producer,
-			Topic:    utils.EmailForgotPassword,
+			Topic:    utils.NOTIF_EMAIL_FORGOT_PASSWORD,
 		},
 	}
 }

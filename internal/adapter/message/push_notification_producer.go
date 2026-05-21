@@ -15,7 +15,7 @@ func NewPushNotificationProducer(producer sarama.SyncProducer) *PushNotification
 	return &PushNotificationProducer{
 		Producer: Producer[*model.UserNotificationEvent]{
 			Producer: producer,
-			Topic:    utils.PushNotification,
+			Topic:    utils.PUSH_NOTIF,
 		},
 	}
 }

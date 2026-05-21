@@ -15,7 +15,7 @@ func NewEmailUpdateCustomerProducer(producer sarama.SyncProducer) *EmailUpdateCu
 	return &EmailUpdateCustomerProducer{
 		Producer: Producer[*model.UserNotificationEvent]{
 			Producer: producer,
-			Topic:    utils.EmailUpdateCustomer,
+			Topic:    utils.NOTIF_EMAIL_UPDATE_CUSTOMER,
 		},
 	}
 }
