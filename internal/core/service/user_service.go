@@ -212,6 +212,15 @@ func (u *userService) UpdatePassword(ctx context.Context, req entity.UserEntity)
 		return err
 	}
 
+	// validasi expired
+	if time.Now().After(token.ExpiresAt) {
+		err = errors.New("token expired")
+		log.Error().
+			Err(err).
+			Str("source", "internal.core.userService.UpdatePassword")
+		return err
+	}
+
 	password, err := conv.HashPassword(req.Password)
 	if err != nil {
 		log.Error().
