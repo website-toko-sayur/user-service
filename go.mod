@@ -4,6 +4,8 @@ go 1.26.3
 
 require (
 	github.com/go-playground/universal-translator v0.18.1
+	github.com/gofiber/fiber/v3 v3.2.0
+	github.com/google/uuid v1.6.0
 	github.com/spf13/viper v1.21.0
 	gorm.io/gorm v1.25.10
 )
@@ -17,10 +19,8 @@ require (
 	github.com/eapache/queue v1.1.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/go-ini/ini v1.67.0 // indirect
-	github.com/gofiber/fiber/v3 v3.2.0 // indirect
 	github.com/gofiber/schema v1.7.1 // indirect
 	github.com/gofiber/utils/v2 v2.0.4 // indirect
-	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
