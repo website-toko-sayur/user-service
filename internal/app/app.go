@@ -65,7 +65,7 @@ func RunServer() {
 
 	if producer != nil {
 		emailVerificationProducer = message.NewEmailVerficationProducer(producer, cfg)
-		emailForgotPasswordProducer = message.NewEmailForgotPasswordProducer(producer)
+		emailForgotPasswordProducer = message.NewEmailForgotPasswordProducer(producer, cfg)
 		emailCreateCustomerProducer = message.NewEmailCreateCustomerProducer(producer, cfg)
 		emailUpdateCustomerProducer = message.NewEmailUpdateCustomerProducer(producer, cfg)
 		pushNotificationProducer = message.NewPushNotificationProducer(producer, cfg)
