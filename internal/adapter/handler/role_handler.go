@@ -9,6 +9,7 @@ import (
 	"user-service/internal/adapter/handler/response"
 	"user-service/internal/core/domain/entity"
 	"user-service/internal/core/service"
+	middlewareGateway "user-service/internal/middleware"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/redis/go-redis/v9"
@@ -39,14 +40,16 @@ func NewRoleHandler(
 	}
 
 	mid := adapter.NewMiddlewareAdapter(cfg, jwtService, redis)
+	midGateway := middlewareGateway.GatewayValidationMiddleware(cfg)
 
-	adminGroup := app.Group("/admin", mid.CheckToken())
+	adminGroup := app.Group("/admin", midGateway, mid.CheckToken())
 
+	// admin route via gateway + jwt
 	adminGroup.Get("/roles", role.GetAll)
 	adminGroup.Post("/roles", role.Create)
+	adminGroup.Get("/roles/:id", role.GetByID)
 	adminGroup.Put("/roles/:id", role.Update)
 	adminGroup.Delete("/roles/:id", role.Delete)
-	adminGroup.Get("/roles/:id", role.GetByID)
 
 	return role
 }

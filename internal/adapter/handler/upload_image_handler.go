@@ -6,6 +6,7 @@ import (
 	"user-service/internal/adapter/handler/response"
 	"user-service/internal/adapter/storage"
 	"user-service/internal/core/service"
+	middlewareGateway "user-service/internal/middleware"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/redis/go-redis/v9"
@@ -32,7 +33,10 @@ func NewUploadImage(
 	}
 
 	mid := adapter.NewMiddlewareAdapter(cfg, jwtService, redis)
-	authGroup := app.Group("/auth", mid.CheckToken())
+	midGateway := middlewareGateway.GatewayValidationMiddleware(cfg)
+
+	// auth route via gateway + jwt
+	authGroup := app.Group("/auth", midGateway, mid.CheckToken())
 	authGroup.Post("/profile/image-upload", res.UploadImage)
 
 	return res

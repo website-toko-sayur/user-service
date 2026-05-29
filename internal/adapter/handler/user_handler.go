@@ -10,6 +10,7 @@ import (
 	"user-service/internal/adapter/handler/response"
 	"user-service/internal/core/domain/entity"
 	"user-service/internal/core/service"
+	middlewareGateway "user-service/internal/middleware"
 	"user-service/utils/conv"
 
 	"github.com/gofiber/fiber/v3"
@@ -50,36 +51,26 @@ func NewUserHandler(
 	}
 
 	mid := adapter.NewMiddlewareAdapter(cfg, jwtService, redis)
+	midGateway := middlewareGateway.GatewayValidationMiddleware(cfg)
 
-	// =========================
-	// Public Routes
-	// =========================
-	app.Post("/signin", userHandler.SignIn)
-	app.Post("/signup", userHandler.CreateUserAccount)
-	app.Post("/forgot-password", userHandler.ForgotPassword)
-	app.Get("/verify-account", userHandler.VerifyAccount)
-	app.Put("/update-password", userHandler.UpdatePassword)
+	// public route via gateway
+	public := app.Group("", midGateway)
+	public.Post("/signin", userHandler.SignIn)
+	public.Post("/signup", userHandler.CreateUserAccount)
+	public.Post("/forgot-password", userHandler.ForgotPassword)
+	public.Get("/verify-account", userHandler.VerifyAccount)
+	public.Put("/update-password", userHandler.UpdatePassword)
 
-	// =========================
-	// Admin Routes
-	// =========================
-	adminGroup := app.Group("/admin", mid.CheckToken())
-
+	// admin route via gateway + jwt
+	adminGroup := app.Group("/admin", midGateway, mid.CheckToken())
 	adminGroup.Get("/customers", userHandler.GetCustomerAll)
 	adminGroup.Post("/customers", userHandler.CreateCustomer)
 	adminGroup.Put("/customers/:id", userHandler.UpdateCustomer)
 	adminGroup.Get("/customers/:id", userHandler.GetCustomerByID)
 	adminGroup.Delete("/customers/:id", userHandler.DeleteCustomer)
 
-	adminGroup.Get("/check", func(c fiber.Ctx) error {
-		return c.SendString("OK")
-	})
-
-	// =========================
-	// Auth Routes
-	// =========================
-	authGroup := app.Group("/auth", mid.CheckToken())
-
+	// auth route via gateway + jwt
+	authGroup := app.Group("/auth", midGateway, mid.CheckToken())
 	authGroup.Get("/profile", userHandler.GetProfileUser)
 	authGroup.Put("/profile", userHandler.UpdateDataUser)
 
