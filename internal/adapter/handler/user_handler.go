@@ -37,6 +37,8 @@ type UserHandlerInterface interface {
 	CreateCustomer(c fiber.Ctx) error
 	UpdateCustomer(c fiber.Ctx) error
 	DeleteCustomer(c fiber.Ctx) error
+
+	GetUserByID(c fiber.Ctx) error
 }
 
 func NewUserHandler(
@@ -54,12 +56,11 @@ func NewUserHandler(
 	midGateway := middlewareGateway.GatewayValidationMiddleware(cfg)
 
 	// public route via gateway
-	public := app.Group("", midGateway)
-	public.Post("/signin", userHandler.SignIn)
-	public.Post("/signup", userHandler.CreateUserAccount)
-	public.Post("/forgot-password", userHandler.ForgotPassword)
-	public.Get("/verify-account", userHandler.VerifyAccount)
-	public.Put("/update-password", userHandler.UpdatePassword)
+	app.Post("/signin", midGateway, userHandler.SignIn)
+	app.Post("/signup", midGateway, userHandler.CreateUserAccount)
+	app.Post("/forgot-password", midGateway, userHandler.ForgotPassword)
+	app.Get("/verify-account", midGateway, userHandler.VerifyAccount)
+	app.Put("/update-password", midGateway, userHandler.UpdatePassword)
 
 	// admin route via gateway + jwt
 	adminGroup := app.Group("/admin", midGateway, mid.CheckToken())
@@ -73,6 +74,10 @@ func NewUserHandler(
 	authGroup := app.Group("/auth", midGateway, mid.CheckToken())
 	authGroup.Get("/profile", userHandler.GetProfileUser)
 	authGroup.Put("/profile", userHandler.UpdateDataUser)
+
+	// internal route
+	internalGroup := app.Group("/internal")
+	internalGroup.Get("/users/:id", userHandler.GetUserByID)
 
 	return userHandler
 }
@@ -745,5 +750,57 @@ func (u *userHandler) SignIn(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(response.DefaultResponse{
 		Message: "success",
 		Data:    respSignIn,
+	})
+}
+
+func (u *userHandler) GetUserByID(c fiber.Ctx) error {
+	ctx := c.Context()
+
+	idParam := c.Params("id")
+	if idParam == "" {
+		return fiber.NewError(fiber.StatusBadRequest, "id invalid")
+	}
+
+	id, err := strconv.ParseInt(idParam, 10, 64)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Str("id", idParam).
+			Str("source", "internal.adapter.userHandler.GetUserByID").
+			Msg("invalid user id")
+
+		return fiber.NewError(fiber.StatusBadRequest, "invalid user id")
+	}
+
+	result, err := u.userService.GetCustomerByID(ctx, id)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Int64("user_id", id).
+			Str("source", "internal.adapter.userHandler.GetUserByID").
+			Msg("failed get user by id")
+
+		if err.Error() == "404" {
+			return fiber.NewError(fiber.StatusNotFound, "user not found")
+		}
+
+		return err
+	}
+
+	respUser := response.CustomerResponse{
+		ID:      result.ID,
+		RoleID:  result.RoleID,
+		Name:    result.Name,
+		Email:   result.Email,
+		Phone:   result.Phone,
+		Address: result.Address,
+		Photo:   result.Photo,
+		Lat:     result.Lat,
+		Lng:     result.Lng,
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.DefaultResponse{
+		Message: "success get user by id",
+		Data:    respUser,
 	})
 }

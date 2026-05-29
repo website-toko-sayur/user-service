@@ -94,7 +94,6 @@ func RunServer() {
 	app := cfg.NewFiber()
 	app.Use(fiberRecover.New())
 	app.Use(fiberCors.New())
-	// app.Use(middlewareGateway.GatewayValidationMiddleware(cfg))
 
 	app.Get("/api/check", func(c fiber.Ctx) error {
 		return c.SendString("OK")
