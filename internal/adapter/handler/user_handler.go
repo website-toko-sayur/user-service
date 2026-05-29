@@ -10,7 +10,7 @@ import (
 	"user-service/internal/adapter/handler/response"
 	"user-service/internal/core/domain/entity"
 	"user-service/internal/core/service"
-	middlewareGateway "user-service/internal/middleware"
+	middleware "user-service/internal/middleware"
 	"user-service/utils/conv"
 
 	"github.com/gofiber/fiber/v3"
@@ -53,7 +53,8 @@ func NewUserHandler(
 	}
 
 	mid := adapter.NewMiddlewareAdapter(cfg, jwtService, redis)
-	midGateway := middlewareGateway.GatewayValidationMiddleware(cfg)
+	midGateway := middleware.GatewayValidationMiddleware(cfg)
+	midInternal := middleware.InternalValidationMiddleware(cfg)
 
 	// public route via gateway
 	app.Post("/signin", midGateway, userHandler.SignIn)
@@ -76,7 +77,7 @@ func NewUserHandler(
 	authGroup.Put("/profile", userHandler.UpdateDataUser)
 
 	// internal route
-	internalGroup := app.Group("/internal")
+	internalGroup := app.Group("/internal", midInternal)
 	internalGroup.Get("/users/:id", userHandler.GetUserByID)
 
 	return userHandler
