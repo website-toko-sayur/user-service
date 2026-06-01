@@ -14,7 +14,6 @@ import (
 	"user-service/utils"
 	"user-service/utils/conv"
 
-	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
@@ -118,7 +117,7 @@ func (u *userService) UpdateCustomer(ctx context.Context, req entity.UserEntity)
 					Err(err).
 					Str("source", "internal.core.userService.UpdateCustomer").
 					Msg("Failed publish update customer event")
-				return fiber.ErrInternalServerError
+				return err
 			}
 		} else {
 			log.Info().
@@ -168,7 +167,7 @@ func (u *userService) CreateCustomer(ctx context.Context, req entity.UserEntity)
 				Err(err).
 				Str("source", "internal.core.userService.CreateCustomer").
 				Msg("Failed publish create customer event")
-			return fiber.ErrInternalServerError
+			return err
 		}
 	} else {
 		log.Info().
@@ -343,7 +342,7 @@ func (u *userService) ForgotPassword(ctx context.Context, req entity.UserEntity)
 				Err(err).
 				Str("source", "internal.core.userService.ForgotPassword").
 				Msg("Failed publish forgot password event")
-			return fiber.ErrInternalServerError
+			return err
 		}
 	} else {
 		log.Info().
@@ -394,7 +393,7 @@ func (u *userService) CreateUserAccount(ctx context.Context, req entity.UserEnti
 				Err(err).
 				Str("source", "internal.core.userService.CreateUserAccount").
 				Msg("Failed publish email verification create user account event")
-			return fiber.ErrInternalServerError
+			return err
 		}
 	} else {
 		log.Info().
