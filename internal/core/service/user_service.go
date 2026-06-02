@@ -102,10 +102,11 @@ func (u *userService) UpdateCustomer(ctx context.Context, req entity.UserEntity)
 		messageparam := fmt.Sprintf("You're account has been updated. Please login use: \n Email: %s\nPassword: %s", req.Email, passwordNoencrypt)
 		if u.emailUpdateCustomerProducer != nil {
 			event := &model.UserNotificationEvent{
-				UserID:    req.ID,
-				Recipient: req.Email,
-				Subject:   "Updated Data Customer",
-				Message:   messageparam,
+				ReceiverEmail:    req.Email,
+				Message:          messageparam,
+				ReceiverID:       req.ID,
+				Subject:          "Updated Data Customer",
+				NotificationType: "EMAIL",
 			}
 
 			log.Info().
@@ -152,10 +153,11 @@ func (u *userService) CreateCustomer(ctx context.Context, req entity.UserEntity)
 	messageparam := fmt.Sprintf("You have been registered in Sayur Project. Please login use: \n Email: %s\nPassword: %s", req.Email, passwordNoEncrypt)
 	if u.emailCreateCustomerProducer != nil {
 		event := &model.UserNotificationEvent{
-			UserID:    userID,
-			Recipient: req.Email,
-			Subject:   "Account Exists",
-			Message:   messageparam,
+			ReceiverEmail:    req.Email,
+			Message:          messageparam,
+			ReceiverID:       userID,
+			Subject:          "Account Exists",
+			NotificationType: "EMAIL",
 		}
 
 		log.Info().
@@ -327,10 +329,11 @@ func (u *userService) ForgotPassword(ctx context.Context, req entity.UserEntity)
 	messageparam := fmt.Sprintf("Please click link below for reset password: %v", urlForgot)
 	if u.emailForgotPasswordProducer != nil {
 		event := &model.UserNotificationEvent{
-			UserID:    user.ID,
-			Recipient: req.Email,
-			Subject:   "Reset password",
-			Message:   messageparam,
+			ReceiverEmail:    req.Email,
+			Message:          messageparam,
+			ReceiverID:       user.ID,
+			Subject:          "Reset password",
+			NotificationType: "EMAIL",
 		}
 
 		log.Info().
@@ -378,10 +381,11 @@ func (u *userService) CreateUserAccount(ctx context.Context, req entity.UserEnti
 
 	if u.emailVerificationProducer != nil {
 		event := &model.UserNotificationEvent{
-			UserID:    userID,
-			Recipient: req.Email,
-			Subject:   "Verify your account",
-			Message:   verifyMsg,
+			ReceiverEmail:    req.Email,
+			Message:          verifyMsg,
+			ReceiverID:       userID,
+			Subject:          "Verify your account",
+			NotificationType: "EMAIL",
 		}
 
 		log.Info().

@@ -3,15 +3,13 @@ package model
 import "strconv"
 
 type UserNotificationEvent struct {
-	UserID    int64  `json:"user_id"`
-	Recipient string `json:"recipient"` // isi email
-	Subject   string `json:"subject"`
-	Message   string `json:"message"`
-}
-
-type NotificationEmailverification struct {
+	ReceiverEmail    string `json:"receiver_email"`
+	Message          string `json:"message"`
+	ReceiverID       int64  `json:"receiver_id"`
+	Subject          string `json:"subject"`
+	NotificationType string `json:"notification_type"`
 }
 
 func (u *UserNotificationEvent) GetId() string {
-	return strconv.Itoa(int(u.UserID))
+	return strconv.Itoa(int(u.ReceiverID))
 }
