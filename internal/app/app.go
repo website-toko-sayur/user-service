@@ -141,7 +141,7 @@ func RunServer() {
 		syscall.SIGTERM,
 	)
 
-	<-quit
+	<-quit // nunggu sampai ada sinyal cancel baru jalankan kode dibawah
 
 	log.Info().
 		Str("source", "internal.app.RunServer").
