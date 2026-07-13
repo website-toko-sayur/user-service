@@ -1,9 +1,12 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"strconv"
+	"time"
 	"user-service/config"
 	"user-service/internal/adapter"
 	"user-service/internal/adapter/handler/request"
@@ -74,6 +77,7 @@ func NewUserHandler(
 	// auth route via gateway + jwt
 	authGroup := app.Group("/auth", midGateway, mid.CheckToken())
 	authGroup.Get("/profile", userHandler.GetProfileUser)
+	authGroup.Get("/unstable-profile", userHandler.GetUserUnstable)
 	authGroup.Put("/profile", userHandler.UpdateDataUser)
 
 	// internal route
@@ -803,5 +807,54 @@ func (u *userHandler) GetUserByID(c fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(response.DefaultResponse{
 		Message: "success get user by id",
 		Data:    respUser,
+	})
+}
+
+func (u *userHandler) GetUserUnstable(c fiber.Ctx) error {
+	// sla endpoint, endpoint ini harus selesai max 2 detik
+	reqCtx, cancel := context.WithTimeout(
+		c.RequestCtx(),
+		2*time.Second,
+	)
+
+	defer cancel()
+
+	// random delay, 0 - 4 detik
+	delay := time.Duration(rand.Intn(4000)) * time.Millisecond
+	log.Info().
+		Dur("delay", delay).
+		Str("source", "internal.adapter.userHandler.GetUserUnstable").
+		Msg("simulate delay")
+
+	// simulasi delay
+	select {
+	case <-time.After(delay):
+		// lanjut proses
+	case <-reqCtx.Done():
+		// timeout / request dibatalkan
+		return fiber.NewError(fiber.StatusGatewayTimeout, "request timeout (SLA exceeded)")
+	}
+
+	// simulasi random server failure
+	if rand.Intn(100) < 50 {
+		return fiber.NewError(fiber.StatusServiceUnavailable, "service unavailable")
+	}
+
+	// dummy sukses
+	respProfile := response.ProfileResponse{
+		RoleName: "test unstable get user profile",
+		ID:       0,
+		Name:     "adit",
+		Email:    "adit@mail.com",
+		Phone:    "123456789",
+		Lat:      "123",
+		Lng:      "123",
+		Address:  "jl. danau toba",
+		Photo:    "",
+	}
+
+	return c.Status(fiber.StatusOK).JSON(response.DefaultResponse{
+		Message: "success",
+		Data:    respProfile,
 	})
 }
