@@ -836,7 +836,7 @@ func (u *userHandler) GetUserUnstable(c fiber.Ctx) error {
 	}
 
 	// simulasi random server failure
-	if rand.Intn(100) < 50 {
+	if rand.Intn(100) < 90 {
 		return fiber.NewError(fiber.StatusServiceUnavailable, "service unavailable")
 	}
 
