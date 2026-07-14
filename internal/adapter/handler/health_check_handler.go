@@ -43,7 +43,6 @@ func (u *healthCheckHandler) HealthCheck(c fiber.Ctx) error {
 			Interface("dependencies", result.Dependencies).
 			Msg("health check failed")
 
-		// return fiber.NewError(fiber.StatusServiceUnavailable, "failed to health check")
 	}
 
 	log.Info().
