@@ -15,6 +15,7 @@ import (
 
 	"user-service/internal/core/service"
 
+	"github.com/IBM/sarama"
 	"github.com/gofiber/fiber/v3"
 	fiberCors "github.com/gofiber/fiber/v3/middleware/cors"
 	fiberRecover "github.com/gofiber/fiber/v3/middleware/recover"
@@ -51,6 +52,15 @@ func RunServer() {
 			Msg("failed connect to redis")
 	}
 
+	// kafka for health check
+	kafkaCLient, err := sarama.NewClient(cfg.Kafka.BootstrapServers, cfg.NewKafkaConfig())
+	if err != nil {
+		log.Fatal().
+			Err(err).
+			Str("source", "internal.app.RunServer").
+			Msg("failed connect to kafka")
+	}
+
 	producer := cfg.NewKafkaProducer()
 
 	var (
@@ -76,13 +86,19 @@ func RunServer() {
 	roleRepo := repository.NewRoleRepository(db.DB)
 
 	jwtService := service.NewJwtService(cfg)
+
+	healthCheckService := service.NewHealthCheckService(
+		redis,
+		db.DB,
+		kafkaCLient,
+	)
+
 	userService := service.NewUserService(
 		userRepo,
 		cfg,
 		jwtService,
 		tokenRepo,
 		redis,
-		db.DB,
 		emailVerificationProducer,
 		emailForgotPasswordProducer,
 		emailCreateCustomerProducer,
@@ -100,6 +116,7 @@ func RunServer() {
 		return c.SendString("OK")
 	})
 
+	handler.NewHealthCheckHandler(app, healthCheckService)
 	handler.NewUserHandler(app, userService, cfg, jwtService, redis)
 	handler.NewUploadImage(app, cfg, storageHandler, jwtService, redis)
 	handler.NewRoleHandler(app, roleService, cfg, jwtService, redis)

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"net/http"
 	"strconv"
 	"time"
 	"user-service/config"
@@ -27,7 +26,6 @@ type userHandler struct {
 }
 
 type UserHandlerInterface interface {
-	HealthCheck(c fiber.Ctx) error
 	SignIn(c fiber.Ctx) error
 	CreateUserAccount(c fiber.Ctx) error
 	ForgotPassword(c fiber.Ctx) error
@@ -62,7 +60,6 @@ func NewUserHandler(
 	midInternal := middleware.InternalValidationMiddleware(cfg)
 
 	// public route via gateway
-	app.Get("/health", midGateway, userHandler.HealthCheck)
 	app.Post("/signin", midGateway, userHandler.SignIn)
 	app.Post("/signup", midGateway, userHandler.CreateUserAccount)
 	app.Post("/forgot-password", midGateway, userHandler.ForgotPassword)
@@ -860,24 +857,4 @@ func (u *userHandler) GetUserUnstable(c fiber.Ctx) error {
 		Message: "success",
 		Data:    respProfile,
 	})
-}
-
-func (u *userHandler) HealthCheck(c fiber.Ctx) error {
-	ctx := c.Context()
-
-	result, err := u.userService.HealthCheck(ctx)
-	if err != nil || result.Status == "DOWN" {
-		log.Error().
-			Err(err).
-			Str("source", "internal.adapter.userHandler.HealthCheck").
-			Msg("failed health check")
-
-		return fiber.NewError(fiber.StatusServiceUnavailable, "failed to health check")
-	}
-
-	return c.Status(http.StatusOK).JSON(response.DefaultResponse{
-		Message: "success",
-		Data:    result,
-	})
-
 }

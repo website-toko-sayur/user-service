@@ -5,6 +5,15 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+func (cfg Config) NewKafkaConfig() *sarama.Config {
+	config := sarama.NewConfig()
+
+	config.Version = sarama.V3_7_0_0
+	config.Producer.Return.Successes = true
+
+	return config
+}
+
 func (cfg Config) NewKafkaConsumerGroup() sarama.ConsumerGroup {
 	saramaConfig := sarama.NewConfig()
 	saramaConfig.Consumer.Return.Errors = true
