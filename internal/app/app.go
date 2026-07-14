@@ -82,6 +82,7 @@ func RunServer() {
 		jwtService,
 		tokenRepo,
 		redis,
+		db.DB,
 		emailVerificationProducer,
 		emailForgotPasswordProducer,
 		emailCreateCustomerProducer,

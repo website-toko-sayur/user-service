@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
 type userService struct {
@@ -30,9 +31,11 @@ type userService struct {
 	emailUpdateCustomerProducer *message.EmailUpdateCustomerProducer
 	pushNotificationProducer    *message.PushNotificationProducer
 	redis                       *redis.Client
+	db                          *gorm.DB
 }
 
 type UserServiceInterface interface {
+	HealthCheck(ctx context.Context) (*entity.HealthCheck, error)
 	SignIn(ctx context.Context, req entity.UserEntity) (*entity.UserEntity, string, error)
 	CreateUserAccount(ctx context.Context, req entity.UserEntity) error
 	ForgotPassword(ctx context.Context, req entity.UserEntity) error
@@ -52,6 +55,7 @@ type UserServiceInterface interface {
 func NewUserService(repo repository.UserRepositoryInterface, cfg *config.Config,
 	jwtService JwtServiceInterface, repoToken repository.VerificationTokenRepositoryInterface,
 	redis *redis.Client,
+	db *gorm.DB,
 	emailVerificationProducer *message.EmailVerificationProducer,
 	emailForgotPasswordProducer *message.EmailForgotPasswordProducer,
 	emailCreateCustomerProducer *message.EmailCreateCustomerProducer,
@@ -63,6 +67,7 @@ func NewUserService(repo repository.UserRepositoryInterface, cfg *config.Config,
 		jwtService:                  jwtService,
 		repoToken:                   repoToken,
 		redis:                       redis,
+		db:                          db,
 		emailVerificationProducer:   emailVerificationProducer,
 		emailForgotPasswordProducer: emailForgotPasswordProducer,
 		emailCreateCustomerProducer: emailCreateCustomerProducer,
@@ -70,6 +75,8 @@ func NewUserService(repo repository.UserRepositoryInterface, cfg *config.Config,
 		pushNotificationProducer:    pushNotificationProducer,
 	}
 }
+
+var startedAt = time.Now()
 
 func (u *userService) DeleteCustomer(ctx context.Context, customerID int64) error {
 	return u.repo.DeleteCustomer(ctx, customerID)
@@ -461,4 +468,31 @@ func (u *userService) SignIn(ctx context.Context, req entity.UserEntity) (*entit
 	}
 
 	return user, token, nil
+}
+
+func (u *userService) HealthCheck(ctx context.Context) (*entity.HealthCheck, error) {
+
+	dbStatus := "UP"
+
+	sqlDB, err := u.db.DB()
+	if err != nil {
+		dbStatus = "DOWN"
+	} else if err := sqlDB.PingContext(ctx); err != nil {
+		dbStatus = "DOWN"
+	}
+
+	status := "UP"
+	if dbStatus == "DOWN" {
+		status = "DOWN"
+	}
+
+	return &entity.HealthCheck{
+		Status:    status,
+		Service:   "user-service",
+		Uptime:    time.Since(startedAt).Round(time.Second).String(),
+		Timestamp: time.Now().UTC(),
+		Dependencies: map[string]string{
+			"database": dbStatus,
+		},
+	}, nil
 }
