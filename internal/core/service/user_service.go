@@ -113,6 +113,9 @@ func (u *userService) UpdateCustomer(ctx context.Context, req entity.UserEntity)
 				Str("source", "internal.core.userService.UpdateCustomer").
 				Msg("Publishing update customer event")
 
+			// emailUpdateCustomerProducer melakukan embedding Producer[*model.UserNotificationEvent]
+			// maka yang dipanggil adalah: Producer[*model.UserNotificationEvent].Send(event)
+			// dan masuk ke: func (p *Producer[T]) Send(event T) error
 			if err = u.emailUpdateCustomerProducer.Send(event); err != nil {
 				log.Warn().
 					Err(err).
